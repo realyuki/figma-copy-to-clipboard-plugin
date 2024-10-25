@@ -1,0 +1,14 @@
+{
+  "name": "figma-copy-to-clipboard-plugin",
+  "id": "14275093143151753155459141124373592301",
+  "api": "1.0.0",
+  "main": "dist/main.js",
+  "capabilities": [],
+  "enableProposedApi": false,
+  "documentAccess": "dynamic-page",
+  "editorType": ["figma"],
+  "ui": "dist/index.html",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}

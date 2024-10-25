@@ -1,0 +1,71 @@
+<h2>Copy text/html</h2>
+<div
+  id="paste-area"
+  contenteditable="true"
+  style="
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 100%;
+    height: 100px;
+    box-sizing: border-box;
+    font-size: 14px;
+  "
+>
+  여기에 붙여넣기 하세요.
+</div>
+<script>
+  document
+    .getElementById("paste-area")
+    .addEventListener("paste", async (event) => {
+      event.preventDefault();
+
+      const clipboardData = event.clipboardData || window.clipboardData;
+      const htmlContent = clipboardData.getData("text/html");
+
+      if (!htmlContent || !htmlContent.includes("<!--(figmeta)")) {
+        parent.postMessage(
+          { pluginMessage: { type: "copy-status", content: "warn" } },
+          "*"
+        );
+        console.warn("'figmeta' 문자열이 클립보드 데이터에 없습니다.");
+        return;
+      }
+
+      const textArea = document.createElement("textarea");
+
+      textArea.value = htmlContent
+        .replace(
+          `<meta charset='utf-8'><meta charset="utf-8"><span data-metadata="<!--(figmeta)`,
+          `<meta charset=\\"utf-8\\"><span data-metadata=\\"<!--(figmeta)`
+        )
+        .replace(
+          `(/figmeta)-->"></span><span data-buffer="<!--(figma)`,
+          `(/figmeta)-->\\"></span><span data-buffer=\\"<!--(figma)`
+        )
+        .replace(
+          `(/figma)-->"></span><span style="white-space:pre-wrap;">`,
+          `(/figma)-->\\"></span><span style=\\"white-space:pre-wrap;\\">`
+        );
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      try {
+        const result = document.execCommand("copy");
+        parent.postMessage(
+          { pluginMessage: { type: "copy-status", content: "success" } },
+          "*"
+        );
+        console.log("Successfully copied to clipboard!");
+      } catch (err) {
+        parent.postMessage(
+          { pluginMessage: { type: "copy-status", content: "failure" } },
+          "*"
+        );
+        console.error("Failed to copy data to clipboard:", err);
+      }
+
+      document.body.removeChild(textArea);
+    });
+</script>
